@@ -37,9 +37,9 @@ public class DoubleGeneratorTest{
       
 	public static void main( String[] args ){
 		// DoubleGenerator g = uniform();
-		DoubleGenerator g = gaussian();
-		// DoubleGenerator g = power_law();
-		// DoubleGenerator g = symmetric_power_law();
+		//DoubleGenerator g = gaussian();
+		 //DoubleGenerator g = power_law();
+		 DoubleGenerator g = symmetric_power_law();
 		int n = 10;
 		// Generating an array of ten random values
 		double[] x = g.generate(n);

@@ -17,6 +17,10 @@ public abstract class Space<T> extends TaggedObject<T>{
 	
 	public Space(){ super(null); }
 	
+    /** Determine if the x point is in the feasible region
+     * @param x
+     * @return
+     */
     public abstract boolean feasible( T x );
 
     
@@ -24,6 +28,10 @@ public abstract class Space<T> extends TaggedObject<T>{
 
 //    public abstract Neighbourhood<T> neighbourhood( T x );
     
+    /** Repair the point x, insert the point int the feasible region
+     * @param x
+     * @return
+     */
     public abstract T repair( T x );
     
     public abstract T pick();

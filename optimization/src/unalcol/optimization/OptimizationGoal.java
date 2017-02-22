@@ -24,6 +24,10 @@ public class OptimizationGoal<T> extends RealQualityGoal<T> {
         this( function, true );
     }
     
+    /**
+     * @param function, function to be optimized
+     * @param minimize
+     */
     public OptimizationGoal( OptimizationFunction<T> function, boolean minimize ){
     	this( function, minimize, minimize?Double.MIN_VALUE:Double.MAX_VALUE );
     }

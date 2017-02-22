@@ -17,8 +17,12 @@ import unalcol.search.space.SpaceSampler;
 public interface Search<T,R> extends SpaceSampler<T>, SolutionManager<T>{
 	public Solution<T> solve( Space<T> space, Goal<T,R> goal );
 	
+	/* (non-Javadoc)
+	 * @see unalcol.search.space.SpaceSampler#apply(unalcol.search.space.Space)
+	 */
 	@Override
 	public default T apply( Space<T> space ) {
+		// Get the goal function
 		@SuppressWarnings("unchecked")
 		Goal<T,R> goal = (Goal<T,R>)space.data(Goal.class.getName());
 		if( goal != null ){

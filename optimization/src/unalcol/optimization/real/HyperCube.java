@@ -42,6 +42,7 @@ public class HyperCube extends Space<double[]> {
     @Override
     public double feasibility( double[] x ){ 
         double d = 0.0;
+        // Manhatan distance
         for( int i=0; i<x.length; i++ ){
             if( x[i] < min[i] ){
                 d += x[i] - min[i];

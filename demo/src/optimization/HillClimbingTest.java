@@ -229,8 +229,8 @@ public class HillClimbingTest{
 	}
     
     public static void main(String[] args){
-    	real(); // Uncomment if testing real valued functions
-    	//binary(); // Uncomment if testing binary valued functions
+    	//real(); // Uncomment if testing real valued functions
+    	binary(); // Uncomment if testing binary valued functions
     	//binary2real(); // Uncomment if you want to try the multi-level search method
     	//queen(); // Uncomment if testing queens (integer) value functions
     }

@@ -10,5 +10,9 @@ package unalcol.search.space;
  * @author jgomez
  */
 public interface SpaceSampler<T> {
+    /**
+     * @param space, search space.
+     * @return
+     */
     public T apply( Space<T> space );
 }
