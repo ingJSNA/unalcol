@@ -45,22 +45,23 @@ public class SimulatedAnnealingTest {
 	public static void real(){
 		// Search Space definition
 		int DIM = 10;
-		double[] min = DoubleArray.create(DIM, -500);
-		double[] max = DoubleArray.create(DIM, 500);
+		double[] min = DoubleArray.create(DIM, -5.12);
+		double[] max = DoubleArray.create(DIM, 5.12);
     	Space<double[]> space = new HyperCube( min, max );
     	
     	// Optimization Function
-    	OptimizationFunction<double[]> function = new Schwefel();		
+		OptimizationFunction<double[]> function = new Schwefel();
         Goal<double[],Double> goal = new OptimizationGoal<double[]>(function); // minimizing, add the parameter false if maximizing
     	
     	// Variation definition
     	DoubleGenerator random = new SimplestSymmetricPowerLawGenerator(); // It can be set to Gaussian or other symmetric number generator (centered in zero)
-    	PickComponents pick = new PermutationPick(DIM/2); // It can be set to null if the mutation operator is applied to every component of the solution array
+		PickComponents pick = null;
+		// pick = new PermutationPick(DIM/2); // It can be set to null if the mutation operator is applied to every component of the solution array
     	IntensityMutation variation = new IntensityMutation( 0.1, random, pick );
         
         // Search method
-        int MAXITERS = 1000;
-        boolean adapt_operator = true; //
+		int MAXITERS = 100 * 1000;
+		boolean adapt_operator = false; //
         LocalSearch<double[],Double> search;
         if( adapt_operator ){
         	OneFifthRule adapt = new OneFifthRule(20, 0.9); // One Fifth rule for adapting the mutation parameter
@@ -80,7 +81,7 @@ public class SimulatedAnnealingTest {
         Write.set(TaggedObject.class, w_desc);
 
         ConsoleTracer tracer = new ConsoleTracer();       
-        Tracer.addTracer(search,tracer);
+		//Tracer.addTracer(search,tracer);
         
         // Apply the search method
         TaggedObject<double[]> solution = search.solve(space, goal);

@@ -20,6 +20,7 @@ import unalcol.optimization.real.mutation.IntensityMutation;
 import unalcol.optimization.real.mutation.OneFifthRule;
 import unalcol.optimization.real.mutation.PermutationPick;
 import unalcol.optimization.real.mutation.PickComponents;
+import unalcol.optimization.real.mutation.PowerLawMutation;
 import unalcol.optimization.real.testbed.Rastrigin;
 //import unalcol.optimization.real.testbed.Rastrigin;
 import unalcol.optimization.real.testbed.Schwefel;
@@ -27,6 +28,7 @@ import unalcol.random.real.DoubleGenerator;
 import unalcol.random.real.PowerLawGenerator;
 import unalcol.random.real.SimplestPowerLawGenerator;
 import unalcol.random.real.SimplestSymmetricPowerLawGenerator;
+import unalcol.random.real.StandardGaussianGenerator;
 import unalcol.random.real.StandardPowerLawGenerator;
 import unalcol.reflect.tag.TaggedObject;
 import unalcol.search.Goal;
@@ -42,10 +44,11 @@ import unalcol.tracer.Tracer;
 import unalcol.types.collection.bitarray.BitArray;
 import unalcol.types.integer.array.IntArray;
 import unalcol.types.integer.array.IntArrayPlainWrite;
+import unalcol.types.real.Statistics;
 import unalcol.types.real.array.DoubleArray;
 import unalcol.types.real.array.DoubleArrayPlainWrite;
 
-public class HillClimbingTest{
+public class MyHillClimbingTest{
 	
 	public static void real(){
 		// Search Space definition
@@ -95,7 +98,7 @@ public class HillClimbingTest{
         System.out.println(solution.info(Goal.class.getName()));		
 	}
 	
-	public static void realPowerLaw(){
+	public static double realPowerLaw(){
 		// Search Space definition
 		int DIM = 10;
 		double[] min = DoubleArray.create(DIM, -5.12);
@@ -108,12 +111,16 @@ public class HillClimbingTest{
         Goal<double[], Double> goal = new OptimizationGoal<double[]>(function); // minimizing, add the parameter false if maximizing   	
     	
     	// Variation definition
-    	DoubleGenerator random = new SimplestPowerLawGenerator(); // It can be set to Gaussian or other symmetric number generator (centered in zero)
-    	PickComponents pick = new PermutationPick(6); // It can be set to null if the mutation operator is applied to every component of the solution array
+    	DoubleGenerator random;
+		//random = new SimplestPowerLawGenerator(); // It can be set to Gaussian or other symmetric number generator (centered in zero)
+		random = new StandardGaussianGenerator();
+    	PickComponents pick;
+    	// pick = new PermutationPick(6); // It can be set to null if the mutation operator is applied to every component of the solution array
+    	pick = null; 
     	IntensityMutation variation = new IntensityMutation( 0.1, random, pick );
         
         // Search method
-        int MAXITERS = 1000;
+        int MAXITERS = 100*1000;
         boolean neutral = true; // Accepts movements when having same function value
         boolean adapt_operator = false; //
         LocalSearch<double[],Double> search;
@@ -140,154 +147,56 @@ public class HillClimbingTest{
         // Apply the search method
         TaggedObject<double[]> solution = search.solve(space, goal);
                 
-        System.out.println(solution.info(Goal.class.getName()));		
-	}
-    
-	public static void binary(){
-		// Search Space definition
-		int DIM = 120;
-    	Space<BitArray> space = new BinarySpace( DIM );
-    	
-    	// Optimization Function
-    	OptimizationFunction<BitArray> function = new Deceptive();		
-        Goal<BitArray,Double> goal = new OptimizationGoal<BitArray>(function, false); // maximizing, remove the parameter false if minimizing   	
-    	
-    	// Variation definition
-    	BitMutation variation = new BitMutation();
+		//System.out.println(solution.info(Goal.class.getName()));
         
-        // Search method
-        int MAXITERS = 10000;
-        boolean neutral = true; // Accepts movements when having same function value
-        boolean adapt_operator = true; //
-        LocalSearch<BitArray,Double> search;
-        if( adapt_operator ){
-        	OneFifthRule adapt = new OneFifthRule(20, 0.9); // One Fifth rule for adapting the mutation parameter
-        	AdaptOperatorOptimizationFactory<BitArray,Double> factory = new AdaptOperatorOptimizationFactory<BitArray,Double>();
-        	search = factory.hill_climbing( variation, adapt, neutral, MAXITERS );
-        }else{
-        	OptimizationFactory<BitArray> factory = new OptimizationFactory<BitArray>();
-        	search = factory.hill_climbing( variation, neutral, MAXITERS );
-        }
-
-        // Tracking the goal evaluations
-        ConsoleTracer tracer = new ConsoleTracer();       
-//      Tracer.addTracer(goal, tracer);  // Uncomment if you want to trace the function evaluations
-        Tracer.addTracer(search, tracer); // Uncomment if you want to trace the hill-climbing algorithm
-        
-        // Apply the search method
-        TaggedObject<BitArray> solution = search.solve(space, goal);
-        
-        System.out.println( solution.info(Goal.class.getName()) + "=" + solution.object());		
+        // return the final solution (fitness)
+        return (double)solution.info(Goal.class.getName());
 	}
 	
-	public static void binary2real(){
-		// Search Space definition
-		int DIM = 10;
-		double[] min = DoubleArray.create(DIM, -500.0);
-		double[] max = DoubleArray.create(DIM, 500.0);
-    	Space<double[]> space = new HyperCube( min, max );
-
-    	// Optimization Function
-    	OptimizationFunction<double[]> function = new Schwefel();		
-        Goal<double[], Double> goal = new OptimizationGoal<double[]>(function); // minimizing, add the parameter false if maximizing   	
+	public static void experiment() {
+		int runs = 30;
+		double[] x = new double[runs];
 		
-        // CodeDecodeMap
-        int BITS_PER_DOUBLE = 16; // Number of bits per integer (i.e. per real)
-        CodeDecodeMap<BitArray, double[]> map = new BinaryToRealVector(BITS_PER_DOUBLE, min, max);
+		
+		
+		double avg = 0.0;
+		for (int r = 0; r < runs; r++) {
+			x[r]=realPowerLaw();
+			System.out.println("run "+r+": "+x[r]);
+			avg += x[r];
+		}
+		
+		Statistics stats = new Statistics(x);
 
-    	// Variation definition in the binary space
-    	BitMutation variation = new BitMutation();
-        
-        // Search method in the binary space
-        int MAXITERS = 10000;
-        boolean neutral = true; // Accepts movements when having same function value
-        boolean adapt_operator = true; //
-        LocalSearch<BitArray,Double> bin_search;
-        if( adapt_operator ){
-        	OneFifthRule adapt = new OneFifthRule(20, 0.9); // One Fifth rule for adapting the mutation parameter
-        	AdaptOperatorOptimizationFactory<BitArray,Double> factory = new AdaptOperatorOptimizationFactory<BitArray,Double>();
-        	bin_search = factory.hill_climbing( variation, adapt, neutral, MAXITERS );
-        }else{
-        	OptimizationFactory<BitArray> factory = new OptimizationFactory<BitArray>();
-        	bin_search = factory.hill_climbing( variation, neutral, MAXITERS );
-        }
+		System.out.println("mean: " + stats.avg);
 
-        // The multilevel search method (moves in the binary space, but computes fitness in the real space)
-        MultiLevelSearch<BitArray, double[], Double> search = new MultiLevelSearch<>(bin_search, map);
-        
-        // Tracking the goal evaluations
-        SolutionDescriptors<double[]> desc = new SolutionDescriptors<double[]>();
-        Descriptors.set(TaggedObject.class, desc);
-        DoubleArrayPlainWrite write = new DoubleArrayPlainWrite(false);
-        Write.set(double[].class, write);
-        //WriteDescriptors w_desc = new WriteDescriptors();
-        //Write.set(Solution.class, w_desc);
+		avg /= runs;
+		DoubleArray.merge(x);
+		double median = x[runs / 2];
+		System.out.println("median: " + median);
 
-        ConsoleTracer tracer = new ConsoleTracer();       
-        Tracer.addTracer(goal, tracer);  // Uncomment if you want to trace the function evaluations
-//        Tracer.addTracer(search, tracer); // Uncomment if you want to trace the hill-climbing algorithm
-        
-        // Apply the search method
-        TaggedObject<double[]> solution = search.solve(space, goal);
-        
-        System.out.println( solution.info(Goal.class.getName()) + "=" + solution.object());		        
-	}
-	
-	public static void queen(){
-		// It is the well-known problem of setting n-queens in a chess board without attacking among them
-		// Search Space definition
-		int DIM = 8; // Board size		
-		int[] min = IntArray.create(DIM, 0); // First possible row index
-		int[] max = IntArray.create(DIM, DIM-1); // Last possible row index
-    	Space<int[]> space = new IntHyperCube( min, max );
-    	
-    	// Optimization Function
-    	OptimizationFunction<int[]> function = new QueenFitness();		
-        Goal<int[], Double> goal = new OptimizationGoal<int[]>(function); // minimizing   	
-    	
-    	// Variation definition
-    	MutationIntArray variation = new MutationIntArray(DIM);
-        
-        // Search method
-        int MAXITERS = 200;
-        boolean neutral = true; // Accepts movements when having same function value
-        boolean adapt_operator = true; //
-        LocalSearch<int[],Double> search;
-        if( adapt_operator ){
-        	OneFifthRule adapt = new OneFifthRule(20, 0.9); // One Fifth rule for adapting the mutation parameter
-        	AdaptOperatorOptimizationFactory<int[],Double> factory = new AdaptOperatorOptimizationFactory<int[],Double>();
-        	search = factory.hill_climbing( variation, adapt, neutral, MAXITERS );
-        }else{
-        	OptimizationFactory<int[]> factory = new OptimizationFactory<int[]>();
-        	search = factory.hill_climbing( variation, neutral, MAXITERS );
-        }
+		double v_avg = 0.0;
+		double v_median = 0.0;
 
-        // Tracking the goal evaluations
-        SolutionDescriptors<int[]> desc = new SolutionDescriptors<int[]>();
-        Descriptors.set(TaggedObject.class, desc);
-        IntArrayPlainWrite write = new IntArrayPlainWrite(',',false);
-        Write.set(int[].class, write);
-        WriteDescriptors w_desc = new WriteDescriptors();
-        Write.set(Solution.class, w_desc);
-        ConsoleTracer tracer = new ConsoleTracer();       
-//      Tracer.addTracer(goal, tracer);  // Uncomment if you want to trace the function evaluations
-        Tracer.addTracer(search, tracer); // Uncomment if you want to trace the hill-climbing algorithm
-        
-        // Apply the search method
-        TaggedObject<int[]> solution = search.solve(space, goal);
-        
-        System.out.println( solution.info(Goal.class.getName()) + "=" + solution.object());		
+		for (int i = 0; i < x.length; i++) {
+			v_avg += (x[i] - avg) * (x[i] - avg);
+			v_median += (x[i] - median) * (x[i] - median);
+		}
+
+		// Standart deviation
+		double s_avg = Math.sqrt(v_avg / (runs - 1));
+		double s_median = Math.sqrt(v_median / (runs - 1));
+
+		System.out.println("Using mean: " + avg + "+/-" + s_avg);
+		System.out.println("Using median: " + median + "+/-" + s_median);
 	}
     
-    public static void main(String[] args){
+	public static void main(String[] args){
     	//real(); // Uncomment if testing real valued functions
     	//binary(); // Uncomment if testing binary valued functions
     	//binary2real(); // Uncomment if you want to try the multi-level search method
     	//queen(); // Uncomment if testing queens (integer) value functions
     	
-		int runs = 30;
-		for (int r = 0; r < runs; r++) {
-			realPowerLaw();
-		}
+		experiment();
     }
 }

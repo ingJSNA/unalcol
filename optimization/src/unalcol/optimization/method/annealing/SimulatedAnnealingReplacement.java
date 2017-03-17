@@ -17,6 +17,10 @@ public class SimulatedAnnealingReplacement<T> extends HillClimbingReplacement<T>
     protected SimulatedAnnealingScheme scheme;
     protected int t=0;
     
+	/**
+	 * @param scheme
+	 *            Determines the process of warming and cooling.
+	 */
     public SimulatedAnnealingReplacement( SimulatedAnnealingScheme scheme ){
         this.scheme = scheme;
     }
@@ -32,7 +36,9 @@ public class SimulatedAnnealingReplacement<T> extends HillClimbingReplacement<T>
     	String gName = Goal.class.getName();
     	double qc = (Double)current.info(gName);
     	double qn = (Double)next.info(gName);
-        if( x==next || Math.exp(-Math.abs(qn-qc)/scheme.get(t++)) > Math.random())
+
+		// if the expression value is close to 1 then reduce the changes
+		if (x == next || Math.exp(-Math.abs(qn - qc) / scheme.get(t++)) < Math.random())
             return next;
         else
             return current;
